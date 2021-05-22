@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>debounce and throttle</title>
+</head>
+<body>
+<!-- https://blog.csdn.net/tedsz1025/article/details/80527416 -->
+<button id="btn">click</button>
+<div id="display"></div>
+<script>
+/**
+ * 防反跳。fn函数在最后一次调用时刻的delay毫秒之后执行！
+ * @param fn 执行函数
+ * @param delay 时间间隔
+ * @param isImmediate 为true，debounce会在delay时间间隔的开始时立即调用这个函数
+ * @returns {Function}
+ */
+function debounce(fn, delay, isImmediate) {
+  var timer = null;  //初始化timer，作为计时清除依据
+  return function() {
+    var context = this;  //获取函数所在作用域this
+    var args = arguments;  //取得传入参数
+    clearTimeout(timer);
+    if(isImmediate && timer === null) {
+      //时间间隔外立即执行
+      fn.apply(context,args);
+      timer = 0;
+      return;
+    }
+    timer = setTimeout(function() {
+      fn.apply(context,args);
+      timer = null;
+    }, delay);
+  }
+}
+
+/* 方法执行e.g. */
+var btn = document.getElementById('btn');
+var el = document.getElementById('display');
+var init = 0;
+btn.addEventListener('click', debounce(function() {
+init++;
+el.innerText = init;
+}, 1000,true));
+</script>
+
+
+<button id="btn2">click2</button>
+<div id="display2"></div>
+<script>
+/**
+ * 创建并返回一个像节流阀一样的函数，当重复调用函数的时候，最多每隔delay毫秒调用一次该函数
+ * @param fn 执行函数
+ * @param delay 时间间隔
+ * @returns {Function}
+ */
+function throttle(fn, delay) {
+  var timer = null;
+  var timeStamp = new Date();
+  return function() {
+    var context = this;  //获取函数所在作用域this
+    var args = arguments;  //取得传入参数
+    console.log(new Date()-timeStamp)
+    if(new Date()-timeStamp > delay){
+      console.log('xxx')
+      timeStamp = new Date();
+      timer = setTimeout(function() {
+        fn.apply(context, args);
+      }, delay);
+    }
+  }
+}
+
+/* 方法执行 */
+var btn = document.getElementById('btn2');
+var el = document.getElementById('display2');
+var init = 0;
+btn.addEventListener('click', throttle(function() {
+  console.log('throttle')
+  init++;
+  el.innerText = init;
+}, 1000));
+</script>
+
+<!-- 心得： debounce 是等电梯有人上电梯来了就继续等，只要调用就setTimeout；而 throttle 是固定等待时间，在这段时间里都只执行一次 -->
+</body>
+</html>
